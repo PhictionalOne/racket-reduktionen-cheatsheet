@@ -1,0 +1,215 @@
+%! TEX root = 'main.tex'
+
+%Template 
+\documentclass[a4paper]{scrartcl}
+
+\usepackage{geometry,forloop,fancyhdr,fancybox,lastpage}
+\usepackage{enumitem}
+\usepackage{adjustbox}
+\geometry{a4paper,left=1cm, right=1cm, top=3cm, bottom=1cm}
+
+% Fonts
+\usepackage{fontspec}
+% \usepackage[]{ucs}   % use φ's intext
+\usepackage[ngerman]{babel}
+
+\usepackage[sfdefault,scaled=.85]{FiraSans}     % Sans font
+\usepackage{newtxsf}
+\renewcommand*\oldstylenums[1]{{\firaoldstyle #1}}
+
+\setmonofont{Fira Code}[Scale=0.8,Contextuals=Alternate]  % Code Font
+\makeatletter
+\renewcommand*\verbatim@nolig@list{}
+\makeatother
+
+% Code
+\usepackage[dvipsnames]{xcolor}
+\usepackage[outputdir=build]{minted}
+\usemintedstyle{trac}
+
+% todonotes
+\usepackage{todonotes}
+
+%Math
+\usepackage{amsmath,amssymb,tabularx}
+\usepackage{ stmaryrd }
+
+%Figures
+\usepackage{graphicx,tikz,color,float}
+\usetikzlibrary{shapes,trees}
+
+\usepackage{hyperref}
+\usepackage{pdfpages}
+
+%Algorithms
+\usepackage[ruled,linesnumbered]{algorithm2e}
+
+% TColorbox
+\usepackage{tcolorbox}
+
+% Colors
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{codegreen-task}{rgb}{0,0.3,0}
+\definecolor{codepurple-task}{rgb}{0.38,0,0.62}
+\definecolor{backcolour-task}{rgb}{0.95,0.95,0.95}
+
+\definecolor{lightolive}{RGB}{216,202,157}
+\definecolor{eigengrau}{RGB}{22,22,29}
+
+
+%Kopf- und Fußzeile
+\pagestyle {fancy}
+\fancyhead[L]{\TUTOR}
+\fancyhead[C]{\COURSE}
+\fancyhead[R]{\today}
+
+\fancyfoot[L]{}
+\fancyfoot[C]{}
+\fancyfoot[R]{Seite \thepage}
+
+%Formatierung der Überschrift, hier nichts ändern
+\def\header#1#2{
+	\begin{center}
+		{\Large\textbf{Übungsblatt #1}}\\
+		{(Abgabetermin #2)}
+	\end{center}
+}
+
+%Definition der Punktetabelle, hier nichts ändern
+\newcounter{punktelistectr}
+\newcounter{punkte}
+\newcommand{\punkteliste}[2]{%
+	\setcounter{punkte}{#2}%
+	\addtocounter{punkte}{-#1}%
+	\stepcounter{punkte}%<-- also punkte = m-n+1 = Anzahl Spalten[1]
+	\begin{center}%
+		\begin{tabularx}{\linewidth}[]{@{}*{\thepunkte}{>{\centering\arraybackslash} X|}@{}>{\centering\arraybackslash}X}
+			\forloop{punktelistectr}{#1}{\value{punktelistectr} < #2 } %
+			{%
+			\thepunktelistectr &
+			}
+			#2                 & $\Sigma$ \\
+			\hline
+			\forloop{punktelistectr}{#1}{\value{punktelistectr} < #2 } %
+			{%
+			                   &
+			}                  &          \\
+			\forloop{punktelistectr}{#1}{\value{punktelistectr} < #2 } %
+			{%
+			                   &
+			}                  &          \\
+		\end{tabularx}
+	\end{center}
+}
+
+\newcommand{\aufgabe}[2]{
+	\section*{Aufgabe #1\hfill\small\textcolor{gray}{(#2 Punkte)}}
+}
+
+% Math notation
+\newcommand{\bigo}{\mathcal{O}}
+\newcommand{\qed}{\begin{flushright}$\square$\end{flushright}}
+\newcommand{\kstn}{\qed}
+
+\newcommand{\bbN}{\mathbb{N}}
+\newcommand{\bbZ}{\mathbb{Z}}
+\newcommand{\bbQ}{\mathbb{Q}}
+\newcommand{\bbR}{\mathbb{R}}
+\newcommand{\calO}{\mathcal{O}}
+\newcommand{\bfE}{\mathbf{E}}
+\newcommand{\bfP}{\mathbf{P}}
+\DeclareMathOperator{\var}{Var}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+% todonotes
+\newcommand{\phiinline}[1]{
+	\todo[inline, author=Phi,
+		backgroundcolor=lightolive, textcolor=eigengrau]{#1}
+}
+\newcommand{\phitodo}[1]{
+	\todo[author=Phi, linecolor=lightolive,
+		backgroundcolor=lightolive, textcolor=eigengrau]{#1}
+}
+
+% tcolorbox
+\tcbuselibrary{breakable}
+
+\newtcolorbox{contentbox}[1]{
+	boxrule=-0.2mm, leftrule=2mm,  middle=2mm, sharp corners,
+	colbacktitle=black!5!white, coltitle=black!55!white,
+	toptitle=1mm, title={\MakeUppercase{\textbf{#1}}}
+}
+
+\newtcolorbox{solutionbox}{
+	boxrule=-0.2mm, leftrule=2mm,  middle=2mm, sharp corners,
+	colbacktitle=black!5!white, coltitle=black!55!white, breakable,
+	toptitle=1mm, title={\MakeUppercase{\textbf{Lösung}}}
+}
+
+\newtcolorbox{warningbox}[1]{
+	boxrule=-0.2mm, leftrule=2mm,  middle=2mm, sharp corners,
+	colback=orange!5!white, colframe=orange!75!white,
+	colbacktitle=orange!5!white, coltitle=black!55!white,
+	toptitle=1mm, title={\MakeUppercase{\textbf{#1}}}
+}
+
+\newtcolorbox{errorbox}[1]{
+	boxrule=-0.2mm, leftrule=2mm,  middle=2mm, sharp corners,
+	colback=red!5!white, colframe=red!75!black,
+	colbacktitle=red!5!white, coltitle=black!55!white,
+	toptitle=1mm, title={\MakeUppercase{\textbf{#1}}}
+}
+
+\newtcolorbox{infobox}[1]{
+	boxrule=-0.2mm, leftrule=2mm,  middle=2mm, sharp corners,
+	colback=blue!5!white, colframe=blue!75!black,
+	colbacktitle=blue!5!white, coltitle=black!55!white,
+	toptitle=1mm, title={\MakeUppercase{\textbf{#1}}}
+}
+
+
+%% Listing Style
+%\lstdefinestyle{task}{
+%    backgroundcolor=\color{backcolour-task},   
+%    commentstyle=\color{codegreen-task},
+%    keywordstyle=\ttfamily\bf\color{black},
+%    numberstyle=\tiny\color{codegray},
+%    stringstyle=\color{codepurple-task},
+%    basicstyle=\ttfamily\footnotesize,
+%    breakatwhitespace=false,         
+%    breaklines=true,                 
+%    captionpos=b,                    
+%    keepspaces=true,                 
+%    numbers=none,                    
+%    numbersep=5pt,                  
+%    showspaces=false,                
+%    showstringspaces=false,
+%    showtabs=false,                  
+%    tabsize=2
+%}
+%
+%\lstdefinestyle{solution}{
+%    backgroundcolor=\color{backcolour},   
+%    commentstyle=\color{codegreen},
+%    keywordstyle=\color{blue},
+%    numberstyle=\tiny\color{codegray},
+%    stringstyle=\color{codepurple},
+%    basicstyle=\ttfamily\footnotesize,
+%    breakatwhitespace=false,         
+%    breaklines=true,                 
+%    captionpos=b,                    
+%    keepspaces=true,                 
+%    numbers=left,                    
+%    numbersep=5pt,                  
+%    showspaces=false,                
+%    showstringspaces=false,
+%    showtabs=false,                  
+%    tabsize=2
+%}
+%
+%\lstset{style=task}
+%\lstset{style=solution}

@@ -1,0 +1,295 @@
+% ----------------------- TODO ---------------------------
+% Diese Daten müssen pro Blatt angepasst werden:
+% Diese Daten müssen einmalig pro Vorlesung angepasst werden:
+\newcommand{\COURSE}{Praktische Informatik 1: Reduktionsregeln}
+\newcommand{\TUTOR}{Alexander \textsc{Phi.} Goetz}
+% ----------------------- TODO ---------------------------
+
+\input{settings}
+
+\newcommand{\reduction}[1]{\texttt{\textbf{[#1]}}}
+\fancyhead[R]{27. Dezember 2022}
+
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+\begin{center}
+	\LARGE Reduktionsregeln
+\end{center}
+
+% ----------------------- TODO ---------------------------
+% Hier werden die Aufgaben/Lösungen eingetragen:
+
+
+\noindent Die Klammern $\llbracket\cdot\rrbracket^k,\ k \geq 0$ geben an wann
+welcher Teilausdruck reduziert werden muss.
+
+Der Ausdruck $\llbracket e\rrbracket^k$ mit dem \textbf{höchsten} $k$ wird
+immer als nächstes reduziert!
+
+\begin{contentbox}{Reduktionsregeln}
+	\begin{enumerate}
+		\item \textbf{Literal} $\ell$ (\texttt{1}, \texttt{\#t}, "\texttt{abc}", \texttt{\#<function:$\otimes$>}, ...): \hfill [\textbf{\texttt{eval\_lit}}]
+		      \vspace{-1em}
+		      \begin{align*}
+			      \llbracket \ell \rrbracket^k \overset{\text{def}}{=} \ell
+		      \end{align*}
+
+		\item \textbf{Lambda-Abstraktion} \texttt{(\textbf{lambda} (v$_1$ ... v$_n$) e)}: \hfill \reduction{eval\_$\lambda$}
+		      \vspace{-1em}
+		      \begin{align*}
+			      \llbracket \texttt{(\textbf{lambda} (v$_1$ ... v$_n$) e)} \rrbracket^k
+			      \overset{\text{def}}{=} \texttt{(\textbf{lambda} (v$_1$ ... v$_n$) e)}
+		      \end{align*}
+
+		\item \textbf{Indentifier} id: \hfill \reduction{eval\_id}
+		      \vspace{-1em}
+		      \begin{align*}
+			      \llbracket \text{id} \rrbracket^k
+			      \overset{\text{def}}{=} \llbracket\texttt{e}\rrbracket^k,
+		      \end{align*}
+		      \vspace{-1em}
+		      falls \texttt{(\textbf{define} id e)} gilt.
+
+		\item \textbf{Applikation} \texttt{(f e$_1$ ... e$_n$)}:\\
+		      Falls f = \texttt{\#<function:$\otimes$>} \hfill \reduction{apply\_prim}
+		      \vspace{-1em}
+		      \begin{align*}
+			      \llbracket \texttt{(f e$_1$ ... e$_n$)} \rrbracket^k
+			      \overset{\text{def}}{=}
+			      \llbracket\llbracket e_1\rrbracket^{k+1} \otimes \dots \otimes \llbracket e_1\rrbracket^{k+1}\rrbracket^k
+		      \end{align*}
+
+		      \vspace{-1em}
+		      Falls f = \texttt{(\textbf{lambda} (v$_1$ ... v$_n$) e)} \hfill \reduction{apply\_$\lambda$}
+		      \vspace{-1em}
+		      \begin{align*}
+			      \llbracket \texttt{(f e$_1$ ... e$_n$)} \rrbracket^k
+			      \overset{\text{def}}{=}
+			      \llbracket
+			      e\{v_1\to\llbracket e_1\rrbracket^{k+2},..., v_n\to\llbracket e_n\rrbracket^{k+2}\}^{k+1}
+			      \rrbracket^k
+		      \end{align*}
+
+		      \vspace{-1em}
+		      sonst \hfill \reduction{apply}
+		      \vspace{-1em}
+		      \begin{align*}
+			      \llbracket \texttt{(f e$_1$ ... e$_n$)} \rrbracket^k
+			      \overset{\text{def}}{=}
+			      \llbracket(\llbracket \texttt{f}\rrbracket^{k+1} e_1 \dots e_n)\rrbracket^k
+		      \end{align*}
+
+		      \begin{errorbox}{Bitte beachten!}
+			      Bei $\llbracket\text{\texttt{(\textbf{f} 1 2)}}\rrbracket^0$ weiß
+			      man noch nicht, dass \texttt{\textbf{f}} eine $\lambda$-Abstraktion
+			      ist. Man kann also \textbf{nicht} sofort
+			      \texttt{\textbf{[apply\_$\lambda$]}} anwenden. Zuerst muss also
+			      \reduction{apply} angewandt werden. Danach \reduction{eval\_id},
+			      dann \reduction{eval\_$\lambda$}. Erst dann lässt sich
+			      \reduction{apply\_$\lambda$} darauf werfen.
+		      \end{errorbox}
+
+		\item \textbf{Fallunterscheidung} \texttt{(\textbf{cond} (t$_1$ e$_1$) (t$_2$ e$_2$) ...)}:
+		      \begin{itemize}
+			      \item $\llbracket$
+			            \texttt{(\textbf{cond} (else e$_1$))}
+			            $\rrbracket^k \overset{\text{def}}{=}$
+			            $\llbracket$ e$_1$
+			            $\rrbracket^k$ \hfill \reduction{cond\_else}
+
+			      \item $\llbracket$
+			            \texttt{(\textbf{cond} (\#t e$_1$) (t$_2$ e$_2$) ...)}
+			            $\rrbracket^k \overset{\text{def}}{=}$
+			            $\llbracket$ e$_1$
+			            $\rrbracket^k$ \hfill \reduction{cond\_\#t}
+
+			      \item $\llbracket$
+			            \texttt{(\textbf{cond} (\#f e$_1$) (t$_2$ e$_2$) ...)}
+			            $\rrbracket^k \overset{\text{def}}{=}$
+			            $\llbracket$
+			            \texttt{(\textbf{cond} (t$_2$ e$_2$) ...)} $\rrbracket^k$
+			            \hfill \reduction{cond\_\#f}
+
+			      \item $\llbracket$
+			            \texttt{(\textbf{cond})}$
+				            \rrbracket^k \overset{\text{def}}{=}$
+			            Abbruch $\lightning$ \hfill \reduction{cond\_fail}
+
+			      \item $\llbracket$
+			            \texttt{(\textbf{cond} (t$_1$ e$_1$) (t$_2$ e$_2$) ...)}
+			            $\rrbracket^k \\\quad\overset{\text{def}}{=} \llbracket$
+			            \texttt{(\textbf{cond} ($\llbracket t_1 \rrbracket^{k+1} e_1$) (t$_2$ e$_2$) ...)}
+			            $\rrbracket^k$ \hfill \reduction{cond}
+		      \end{itemize}
+		      \begin{infobox}{\texttt{cond} ist "faul", d.h.}
+			      \reduction{cond\_\#t} $t_2, e_2, ...$ werden nie ausgewertet.
+
+			      \reduction{cond\_\#f} $e_1$ wird nie ausgewertet.
+		      \end{infobox}
+	\end{enumerate}
+\end{contentbox}
+
+\begin{contentbox}{Desugaring: \texttt{and/or -> if -> cond}}
+	\begin{minipage}[t]{.5\linewidth}
+		\texttt{(\textbf{and} t$_1$ t$_2$ ...) $\equiv$ (\textbf{if} t$_1$ (\textbf{and} t$_2$ ...) \#f)} \\
+		\texttt{(\textbf{or} t$_1$ t$_2$ ...)~ $\equiv$ (\textbf{if} t$_1$ \#t (\textbf{or} t$_2$ ...))}
+	\end{minipage}%
+	\begin{minipage}[t]{.5\linewidth}
+		\texttt{(\textbf{if} t$_1$ e$_1$ e$_2$)}\\
+		\texttt{$\equiv$ (\textbf{cond} (t$_1$ e$_1$) (\textbf{else} e$_2$))}
+	\end{minipage}%
+\end{contentbox}
+
+
+\newpage
+\section*{Beispiel}
+
+Wir definieren uns die Funktion \texttt{maybe-div}, die uns anstatt
+\textit{/: division by zero} einfach \texttt{\#f} zurückgibt.
+
+Links die "normale" Definition. Rechts die \textit{entzuckerte}, in der
+\texttt{if} zu \texttt{cond} wird.
+
+\begin{minipage}[t]{.5\linewidth}
+	\begin{minted}[linenos]{racket}
+(: maybe-div (number number 
+              -> (mixed (enum #f) number)))
+(define maybe-div
+  (λ (x y)
+    (if (= 0 y)
+        #f
+        (/ x y))))
+\end{minted}
+\end{minipage}%
+\begin{minipage}[t]{.5\linewidth}
+	\begin{minted}[linenos]{racket}
+(: maybe-div (number number
+              -> (mixed (enum #f) number)))
+(define maybe-div
+  (λ (x y)
+    (cond ((= 0 y) #f)
+          (else    (/ x y)))))
+\end{minted}
+\end{minipage}
+
+\begin{center}
+	\bfseries
+	Reduktionsschritte
+\end{center}
+
+\footnotesize
+\newcommand{\reduce}[2]{$\llbracket$\texttt{#1}$\rrbracket^#2$}
+\newcommand{\accentcolor}{blue}
+\newcommand{\highlighter}[1]{\textcolor{\accentcolor}{#1}}
+
+\centering
+\begin{minipage}{.8\linewidth}
+	\footnotesize
+	\noindent\texttt{\ \ }\reduce{{(\textbf{maybe-div} (* 4 21) 2)}}{0}\hfill\reduction{apply}
+
+	\texttt{= }\reduce{(\reduce{{\textbf{maybe-div}}}{1} (* 4 21) 2)}{0}\hfill\reduction{eval\_id:maybe-div}
+
+	\texttt{= }$\llbracket$($\llbracket$\texttt{(\textbf{lambda} (x y)}\hfill\reduction{eval\_$\lambda$}
+
+	\quad\texttt{\ \ (\textbf{cond} ((\textbf{=} 0 y)\ \#f)}
+
+	\quad\texttt{\ \ \ \ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} x y))))}$\rrbracket^1$ \texttt{(\textbf{*} 4 21) 2)}$\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{((\textbf{lambda} (x y)}\hfill\reduction{apply\_$\lambda$}
+
+	\quad\texttt{\ \ (\textbf{cond} ((\textbf{=} 0 y)\ \#f)}
+
+	\quad\texttt{\ \ \ \ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} x y)))) (\textbf{*} 4 21) 2)}$\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} ((\textbf{=} 0 y)\ \#f)}\hfill\reduction{apply}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} x y)))\{x}$\to\llbracket$\texttt{(* 4 21)}$\rrbracket^2$, \texttt{y}$\to\llbracket$\texttt{2}$\rrbracket^2$\texttt{\}}$^1\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} ((\textbf{=} 0 y)\ \#f)}\hfill\reduction{eval\_id:*}
+
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} x y)))\{x}$\to\llbracket$\texttt{(}$\llbracket$\texttt{\textbf{\#<function:*>}}$\rrbracket^3$\texttt{4 21)}$\rrbracket^2$, \texttt{y}$\to\llbracket$\texttt{2}$\rrbracket^2$\texttt{\}}$^1\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} ((\textbf{=} 0 y)\ \#f)}\hfill\reduction{eval\_lit:\#<function:*>}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} x y)))\{x}$\to\llbracket$\texttt{(}$\llbracket$\texttt{\textbf{\#<function:*>}}$\rrbracket^3$\texttt{4 21)}$\rrbracket^2$, \texttt{y}$\to\llbracket$\texttt{2}$\rrbracket^2$\texttt{\}}$^1\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} ((\textbf{=} 0 y)\ \#f)}\hfill\reduction{apply\_prim}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} x y)))\{x}$\to\llbracket$\texttt{(4 * 21)}$\rrbracket^2$, \texttt{y}$\to\llbracket$\texttt{2}$\rrbracket^2$\texttt{\}}$^1\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} ((\textbf{=} 0 y)\ \#f)}\hfill\reduction{eval\_lit:4,21}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} x y)))\{x}$\to\llbracket$\texttt{(\reduce{4}{3} * \reduce{21}{3})}$\rrbracket^2$, \texttt{y}$\to\llbracket$\texttt{2}$\rrbracket^2$\texttt{\}}$^1\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} ((\textbf{=} 0 y)\ \#f)}\hfill\reduction{multiply}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} x y)))\{x}$\to\llbracket$\texttt{(4 * 21)}$\rrbracket^2$, \texttt{y}$\to\llbracket$\texttt{2}$\rrbracket^2$\texttt{\}}$^1\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} ((\textbf{=} 0 y)\ \#f)}\hfill\reduction{eval\_lit:84,2}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} x y)))\{x}$\to\llbracket$\texttt{84}$\rrbracket^2$, \texttt{y}$\to\llbracket$\texttt{2}$\rrbracket^2$\texttt{\}}$^1\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} ((\textbf{=} 0 y)\ \#f)}\hfill\reduction{$\cdot\to\cdot$}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} x y)))\{x}$\to$\texttt{84, y}$\to$\texttt{2\}}$^1\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} ((\textbf{=} 0 2)\ \#f)}\hfill\reduction{cond}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} 84 2)))}$\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} (}$\llbracket$\texttt{(\textbf{=} 0 2)}$\rrbracket^1$\texttt{\ \#f)}\hfill\reduction{apply}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} 84 2)))}$\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} (}$\llbracket$\texttt{(}$\llbracket$\texttt{\textbf{=}}$\rrbracket^2$\texttt{ 0 2)}$\rrbracket^1$\texttt{\ \#f)}\hfill\reduction{eval\_id:=}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} 84 2)))}$\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} (}$\llbracket$\texttt{(}$\llbracket$\texttt{\textbf{\#<function:=>}}$\rrbracket^2$\texttt{ 0 2)}$\rrbracket^1$\texttt{\ \#f)}\hfill\reduction{eval\_lit:\#<function:=>}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} 84 2)))}$\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} (}$\llbracket$\texttt{0 = 2}$\rrbracket^1$\texttt{\ \#f)}\hfill\reduction{apply\_prim}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} 84 2)))}$\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} (\reduce{\reduce{0}{2} = \reduce{2}{2}}{1}\ \#f)}\hfill\reduction{eval\_lit:0,2}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} 84 2)))}$\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} (\reduce{0 = 2}{1}\ \#f)}\hfill\reduction{comparison}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} 84 2)))}$\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} (\reduce{\#f}{1}\ \#f)}\hfill\reduction{eval\_lit:\#f}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} 84 2)))}$\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} (\#f\ \#f)}\hfill\reduction{cond\_\#f}
+
+	\quad\texttt{\ \ \ \ \ (\textbf{else}\ \ \ \ (\textbf{/} 84 2)))}$\rrbracket^0$
+
+	\texttt{= }$\llbracket$\texttt{(\textbf{cond} (\textbf{else} (\textbf{/} 84 2)))}$\rrbracket^0$\hfill\reduction{cond\_else}
+
+	\texttt{= \reduce{(\textbf{/} 84 2)}{0}}\hfill\reduction{apply}
+
+	\texttt{= \reduce{(\reduce{/}{1} 84 2}{0}}\hfill\reduction{eval\_id:/}
+
+	\texttt{= \reduce{(\reduce{\textbf{\#<function:/>}}{1} 84 2}{0}}\hfill\reduction{eval\_lit:\#<function:/>}
+
+	\texttt{= \reduce{84 / 2}{0}}\hfill\reduction{apply\_prim}
+
+	\texttt{= \reduce{\reduce{84}{1} / \reduce{2}{1}}{0}}\hfill\reduction{eval\_lit:84:2}
+
+	\texttt{= \reduce{84 / 2}{1}}\hfill\reduction{Division}
+
+	\texttt{= \reduce{42}{1}}\hfill\reduction{eval\_lit:42}
+
+	\texttt{= \underline{42}}
+\end{minipage}
+
+
+\end{document}
